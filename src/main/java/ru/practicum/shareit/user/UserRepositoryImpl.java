@@ -60,7 +60,7 @@ public class UserRepositoryImpl implements UserRepository {
     private void validateUniqueEmail(UserDto userDto, int userId) {
         String email = userDto.getEmail();
         for (User user : users.values()) {
-            if (user.getEmail().equalsIgnoreCase(email) & userId != user.getId()) {
+            if (user.getEmail().equalsIgnoreCase(email) && userId != user.getId()) {
                 throw new ValidationException("Адрес электронной почты должен быть уникален.");
             }
         }
