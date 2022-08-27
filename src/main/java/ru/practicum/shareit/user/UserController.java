@@ -15,17 +15,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService service;
+    private final UserMapper mapper;
 
     @PostMapping
     public UserDto create(@Validated({Create.class}) @RequestBody UserDto userDto) {
         log.trace("Получен POST-запрос на добавление пользователя {}.", userDto.getName());
-        return service.addUser(userDto);
+        User user = mapper.toUser(userDto);
+        User createdUser = service.addUser(user);
+        return mapper.toUserDto(createdUser);
     }
 
     @PatchMapping("/{userId}")
     public UserDto update(@Validated({Update.class}) @RequestBody UserDto userDto,
                           @PathVariable int userId) {
         log.trace("Получен PATCH-запрос на обновление пользователя {}, ID {}.", userDto.getName(), userId);
+
         return service.updateUser(userDto, userId);
     }
 

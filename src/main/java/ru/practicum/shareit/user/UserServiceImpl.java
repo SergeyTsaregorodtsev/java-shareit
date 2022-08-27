@@ -14,17 +14,15 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
     @Override
-    public UserDto addUser(UserDto userDto) {
-        User user = repository.addUser(userDto);
+    public User addUser(User user) {
         log.trace("Добавлен пользователь {}, ID {}.", user.getName(), user.getId());
-        return UserMapper.toUserDto(user);
+        return repository.save(user);
     }
 
     @Override
-    public UserDto updateUser(UserDto userDto, int userId) {
-        User user = repository.updateUser(userDto, userId);
+    public UserDto updateUser(User user, int userId) {
         log.trace("Изменён пользователь {}, ID {}.", user.getName(), userId);
-        return UserMapper.toUserDto(user);
+        return repository.save(user, userId);
     }
 
     @Override
