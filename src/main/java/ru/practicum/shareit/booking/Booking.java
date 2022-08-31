@@ -8,7 +8,6 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
-@RequiredArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "bookings", schema = "public")

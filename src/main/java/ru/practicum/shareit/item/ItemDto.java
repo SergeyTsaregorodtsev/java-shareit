@@ -19,5 +19,5 @@ public class ItemDto {
     private final int ownerID;
     @NotNull(groups = {Create.class})
     private final Boolean available;
-    private final ItemRequest request;
+    private final Integer requestId;
 }

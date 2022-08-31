@@ -39,4 +39,10 @@ public class Item {
 
     @Transient
     private List<Feedback> feedbacks;
+
+    public Item(@NonNull String name, @NonNull String description, boolean available) {
+        this.name = name;
+        this.description = description;
+        this.available = available;
+    }
 }

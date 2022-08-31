@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import javax.persistence.Entity;
 
 @Data
-@RequiredArgsConstructor
 @NoArgsConstructor
 
 public class Feedback {

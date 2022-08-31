@@ -15,21 +15,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService service;
-    private final UserMapper mapper;
 
     @PostMapping
     public UserDto create(@Validated({Create.class}) @RequestBody UserDto userDto) {
         log.trace("Получен POST-запрос на добавление пользователя {}.", userDto.getName());
-        User user = mapper.toUser(userDto);
-        User createdUser = service.addUser(user);
-        return mapper.toUserDto(createdUser);
+        return service.addUser(userDto);
     }
 
     @PatchMapping("/{userId}")
     public UserDto update(@Validated({Update.class}) @RequestBody UserDto userDto,
                           @PathVariable int userId) {
         log.trace("Получен PATCH-запрос на обновление пользователя {}, ID {}.", userDto.getName(), userId);
-
         return service.updateUser(userDto, userId);
     }
 
@@ -46,8 +42,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public UserDto delete(@PathVariable int userId) {
+    public void delete(@PathVariable int userId) {
         log.trace("Получен DELETE-запрос на удаление пользователя ID {}.", userId);
-        return service.removeUser(userId);
+        service.removeUser(userId);
     }
 }
