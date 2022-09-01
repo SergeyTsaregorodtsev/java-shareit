@@ -1,10 +1,14 @@
 package ru.practicum.shareit.booking;
 
+import java.util.List;
+
 public interface BookingService {
 
-    BookingDto addBooking (BookingDto bookingDto, int userId);
+    BookingDtoOut addBooking (BookingDto bookingDto, int userId);
 
-    void approve (int bookingId, int userId, String approved);
+    BookingDtoOut approve (int bookingId, int userId, String approved);
 
-    BookingDto get (int bookingId, int userId);
+    BookingDtoOut get (int bookingId, int userId);
+
+    List<BookingDtoOut> getAll (int userId, String state);
 }

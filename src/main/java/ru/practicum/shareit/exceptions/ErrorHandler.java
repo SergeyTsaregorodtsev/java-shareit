@@ -35,4 +35,10 @@ public class ErrorHandler {
     public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         return new ErrorResponse(String.format("Ошибка: %s", e.getMessage()));
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadParameterException(final BadParameterException e) {
+        return new ErrorResponse(String.format("Ошибка: %s", e.getMessage()));
+    }
 }

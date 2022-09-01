@@ -16,7 +16,7 @@ public class ItemDto {
     private final String name;
     @NotBlank(groups = {Create.class})
     private final String description;
-    private final int ownerID;
+    //private final int ownerID;
     @NotNull(groups = {Create.class})
     private final Boolean available;
     private final Integer requestId;

@@ -19,19 +19,19 @@ public class Booking {
     private int id;
 
     @NonNull
+    @Column(name = "item_id", nullable = false)
+    private int item;
+
+    @Column(name = "booker_id", nullable = false)
+    private int booker;
+
+    @NonNull
     @Column(name = "start_date", nullable = false)
     private LocalDateTime start;
 
     @NonNull
     @Column(name = "end_date", nullable = false)
     private LocalDateTime end;
-
-    @NonNull
-    @Column(name = "item_id", nullable = false)
-    private int item;
-
-    @Column(name = "booker_id", nullable = false)
-    private int booker;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)

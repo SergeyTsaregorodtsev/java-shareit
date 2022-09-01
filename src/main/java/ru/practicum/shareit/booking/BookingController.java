@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.Create;
-import ru.practicum.shareit.item.ItemDto;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -15,25 +16,32 @@ public class BookingController {
     private final BookingService service;
 
     @PostMapping
-    public BookingDto add(@RequestHeader("X-Sharer-User-Id") int userId,
+    public BookingDtoOut add(@RequestHeader("X-Sharer-User-Id") int userId,
                        @Validated({Create.class}) @RequestBody BookingDto bookingDto) {
-        log.trace("Получен POST-запрос на бронирование вещи ID {} от пользователя ID {}.", bookingDto.getItem(), userId);
+        log.trace("Получен POST-запрос на бронирование вещи ID {} от пользователя ID {}.", bookingDto.getItemId(), userId);
         return service.addBooking(bookingDto, userId);
     }
 
     @PatchMapping("/{bookingId}")
-    public void approve(@RequestHeader("X-Sharer-User-Id") int userId,
+    public BookingDtoOut approve(@RequestHeader("X-Sharer-User-Id") int userId,
                            @PathVariable int bookingId,
                            @RequestParam(value = "approved") String approved) {
         log.trace("Получен PATCH-запрос подтверждения брони ID {} от пользователя ID {}.", bookingId, userId);
-        service.approve(bookingId, userId, approved);
+        return service.approve(bookingId, userId, approved);
     }
 
     @GetMapping("/{bookingId}")
-    public void get(@RequestHeader("X-Sharer-User-Id") int userId,
+    public BookingDtoOut get(@RequestHeader("X-Sharer-User-Id") int userId,
                         @PathVariable int bookingId) {
         log.trace("Получен GET-запрос брони ID {} от пользователя ID {}.", bookingId, userId);
-        service.get(bookingId, userId);
+        return service.get(bookingId, userId);
+    }
+
+    @GetMapping()
+    public List<BookingDtoOut> getAll(@RequestHeader("X-Sharer-User-Id") int userId,
+                                   @RequestParam(value = "state", defaultValue = "ALL") String state) {
+        log.trace("Получен GET-запрос брони от пользователя ID {}, статус - {}.", userId, state);
+        return service.getAll(userId, state);
     }
 
 

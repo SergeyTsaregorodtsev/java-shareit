@@ -1,10 +1,5 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.requests.ItemRequest;
-
-import java.util.ArrayList;
-import java.util.List;
-
 public class ItemMapper {
 
     public static ItemDto toItemDto(Item item) {
@@ -12,7 +7,7 @@ public class ItemMapper {
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getOwnerId(),
+                //item.getOwnerId(),
                 item.isAvailable(),
                 item.getRequestId()
         );
