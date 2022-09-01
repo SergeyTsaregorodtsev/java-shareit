@@ -18,14 +18,6 @@ public class ItemMapper {
         );
     }
 
-/*    public static List<ItemDto> toItemDto(Iterable<Item> items) {
-        List<ItemDto> dtos = new ArrayList<>();
-        for (Item item : items) {
-            dtos.add(toItemDto(item));
-        }
-        return dtos;
-    }*/
-
     public static Item toItem(ItemDto itemDto) {
         Item item = new Item(
                 itemDto.getName(),
