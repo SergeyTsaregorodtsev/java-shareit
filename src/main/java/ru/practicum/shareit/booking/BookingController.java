@@ -41,9 +41,15 @@ public class BookingController {
     public List<BookingDtoOut> getAll(@RequestHeader("X-Sharer-User-Id") int userId,
                                    @RequestParam(value = "state", defaultValue = "ALL") String state) {
         log.trace("Получен GET-запрос брони от пользователя ID {}, статус - {}.", userId, state);
-        return service.getAll(userId, state);
+        return service.getAll(userId, state, false);
     }
 
+    @GetMapping("/owner")
+    public List<BookingDtoOut> getOwn(@RequestHeader("X-Sharer-User-Id") int userId,
+                                      @RequestParam(value = "state", defaultValue = "ALL") String state) {
+        log.trace("Получен GET-запрос бронирований на вещи пользователя ID {}, статус - {}.", userId, state);
+        return service.getAll(userId, state, true);
+    }
 
 
 }

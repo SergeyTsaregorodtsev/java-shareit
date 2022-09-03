@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,16 +16,20 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "bookings", schema = "public")
 public class Booking {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @NonNull
-    @Column(name = "item_id", nullable = false)
-    private int item;
+    @ManyToOne
+    @JoinColumn(name = "item_id", nullable = false)
+    private Item item;
 
-    @Column(name = "booker_id", nullable = false)
-    private int booker;
+    @NonNull
+    @ManyToOne
+    @JoinColumn(name = "booker_id", nullable = false)
+    private User booker;
 
     @NonNull
     @Column(name = "start_date", nullable = false)
@@ -33,10 +39,10 @@ public class Booking {
     @Column(name = "end_date", nullable = false)
     private LocalDateTime end;
 
+    @NonNull
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
-
 
     enum Status {
         WAITING,    // ожидает одобрения

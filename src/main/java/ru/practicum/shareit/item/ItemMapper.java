@@ -1,5 +1,9 @@
 package ru.practicum.shareit.item;
 
+import ru.practicum.shareit.user.User;
+
+import java.util.ArrayList;
+
 public class ItemMapper {
 
     public static ItemDto toItemDto(Item item) {
@@ -7,16 +11,31 @@ public class ItemMapper {
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                //item.getOwnerId(),
                 item.isAvailable(),
-                item.getRequestId()
+                item.getRequestId(),
+                null,
+                null
         );
     }
 
-    public static Item toItem(ItemDto itemDto) {
+    public static ItemDtoOut toItemDtoOut(Item item) {
+        return new ItemDtoOut(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.isAvailable(),
+                item.getRequestId(),
+                null,
+                null,
+                new ArrayList<>()
+        );
+    }
+
+    public static Item toItem(ItemDto itemDto, User owner) {
         Item item = new Item(
                 itemDto.getName(),
                 itemDto.getDescription(),
+                owner,
                 itemDto.getAvailable()
         );
         Integer requestId = itemDto.getRequestId();
@@ -25,5 +44,4 @@ public class ItemMapper {
         }
         return item;
     }
-
 }

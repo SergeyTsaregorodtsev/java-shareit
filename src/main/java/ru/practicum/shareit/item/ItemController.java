@@ -31,20 +31,33 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") int userId) {
+    public List<ItemDtoOut> getAll(@RequestHeader("X-Sharer-User-Id") int userId) {
         log.trace("Получен GET-запрос на получение списка вещей пользователя ID {}.", userId);
         return service.getItems(userId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto get(@PathVariable int itemId) {
+    public ItemDtoOut get(@RequestHeader("X-Sharer-User-Id") int userId,
+                       @PathVariable int itemId) {
         log.trace("Получен GET-запрос на вещь ID {}.", itemId);
-        return service.getItem(itemId);
+        return service.getItem(itemId, userId);
     }
 
     @GetMapping("/search")
     public List<ItemDto> search(@RequestParam(name = "text") String text) {
         log.trace("Получен GET-запрос на поиск вещей по ключевому слову '{}'.", text);
         return service.search(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestBody CommentDto commentDto,
+                                 @RequestHeader("X-Sharer-User-Id") int userId,
+                                 @PathVariable int itemId) {
+        return service.addComment(commentDto, itemId, userId);
+    }
+
+    @GetMapping("/{itemId}/comments")
+    public List<CommentDto> getComments(@PathVariable int itemId) {
+        return service.getComments(itemId);
     }
 }

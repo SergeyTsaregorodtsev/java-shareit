@@ -16,19 +16,20 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BookingServiceImpl implements BookingService{
+public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
-    private final BookingMapper mapper;
 
     @Override
     public BookingDtoOut addBooking(BookingDto bookingDto, int userId) {
+
         if (bookingDto.getStart().isBefore(LocalDateTime.now())
                 || bookingDto.getEnd().isBefore(LocalDateTime.now())
                 || bookingDto.getEnd().isBefore(bookingDto.getStart())) {
             throw new BadParameterException("Неверно указано время бронирования.");
         }
+
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
             throw new EntityNotFoundException("Указанный пользователь не существует.");
@@ -37,20 +38,23 @@ public class BookingServiceImpl implements BookingService{
         Optional<Item> item = itemRepository.findById(itemId);
         if (item.isEmpty()) {
             throw new EntityNotFoundException("Неверно указан ID вещи.");
-        } else if (!item.get().isAvailable()) {
+        }
+        if (!item.get().isAvailable()) {
             throw new BadParameterException("Указанная вещь недоступна для бронирования.");
         }
+        if (item.get().getOwner().getId() == userId) {
+            throw new EntityNotFoundException("Владелец вещи не может её забронировать.");
+        }
 
-        Booking booking = mapper.toBooking(bookingDto);
-        booking.setBooker(userId);
-        booking.setStatus(Booking.Status.WAITING);
+        Booking booking = BookingMapper.toBooking(bookingDto, item.get(), user.get(), Booking.Status.WAITING);
         bookingRepository.save(booking);
         log.trace("Добавлено бронирование ID {}, вещь ID {}.", booking.getItem(), userId);
-        return mapper.toBookingDto(booking);
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Override
     public BookingDtoOut approve(int bookingId, int userId, String approve) {
+
         try {
             ApproveValues.valueOf(approve.toUpperCase());
         } catch (IllegalArgumentException ignored) {
@@ -61,12 +65,16 @@ public class BookingServiceImpl implements BookingService{
         if (booking.isEmpty()) {
             throw new EntityNotFoundException("Неверно указан ID бронирования.");
         }
-        Booking approvedBooking = booking.get();
 
-        int itemId = approvedBooking.getItem();
+        Booking approvedBooking = booking.get();
+        if (!approvedBooking.getStatus().equals(Booking.Status.WAITING)) {
+            throw new BadParameterException("Статус бронирования уже изменён.");
+        }
+
+        int itemId = approvedBooking.getItem().getId();
         Optional<Item> item = itemRepository.findById(itemId);
-        if (item.isPresent() && item.get().getOwnerId() != userId) {
-            throw new ValidationException("Подтердить бронирование может только владелец вещи.");
+        if (item.isPresent() && item.get().getOwner().getId() != userId) {
+            throw new EntityNotFoundException("Подтердить бронирование может только владелец вещи.");
         }
 
         Booking.Status status;
@@ -78,7 +86,7 @@ public class BookingServiceImpl implements BookingService{
         approvedBooking.setStatus(status);
         bookingRepository.save(approvedBooking);
         log.trace("Статус бронирования ID {} обновлён до {}.", bookingId, status);
-        return mapper.toBookingDto(approvedBooking);
+        return BookingMapper.toBookingDto(approvedBooking);
     }
 
     @Override
@@ -88,20 +96,20 @@ public class BookingServiceImpl implements BookingService{
             throw new EntityNotFoundException("Неверно указан ID бронирования.");
         }
         Booking currentBooking = booking.get();
-        int bookerId = currentBooking.getBooker();
-        Optional<Item> item = itemRepository.findById(currentBooking.getItem());
+        int bookerId = currentBooking.getBooker().getId();
+        Optional<Item> item = itemRepository.findById(currentBooking.getItem().getId());
         if (item.isEmpty()) {
             throw new EntityNotFoundException("Неверно указан ID бронирования.");
         }
-        int ownerId = item.get().getOwnerId();
+        int ownerId = item.get().getOwner().getId();
         if (userId != bookerId & userId != ownerId) {
-            throw new ValidationException("Пользователь не может запрашивать данные.");
+            throw new EntityNotFoundException("Пользователь не может запрашивать данные.");
         }
-        return mapper.toBookingDto(bookingRepository.findBookingById(bookingId));
+        return BookingMapper.toBookingDto(bookingRepository.findBookingById(bookingId));
     }
 
     @Override
-    public List<BookingDtoOut> getAll(int userId, String state) {
+    public List<BookingDtoOut> getAll(int userId, String state, boolean isOwn) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
             throw new EntityNotFoundException("Указанный пользователь не существует.");
@@ -109,47 +117,55 @@ public class BookingServiceImpl implements BookingService{
         try {
             StateValues.valueOf(state);
         } catch (IllegalArgumentException ignored) {
-            throw new ValidationException("Неверный статус бронирования.");
+            throw new BadParameterException("Unknown state: " + state);
         }
-        List<Booking> bookings = new ArrayList<>();
-        List<BookingDtoOut> bookingDtos = new ArrayList<>();
+        List<Booking> bookings;
+        LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case "ALL": {
-                bookings = bookingRepository.findBookingsByBookerOrderByStartDesc(userId);
+                bookings = isOwn ?
+                    bookingRepository.findOwn(userId) :
+                    bookingRepository.findBookingsByBookerIdOrderByStartDesc(userId);
                 break;
             }
             case "CURRENT": {
+                bookings = isOwn ?
+                    bookingRepository.findOwnCurrent(userId, now) :
+                    bookingRepository.findBookingsByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                            userId, now, now);
                 break;
             }
             case "PAST": {
-                bookings = bookingRepository.findBookingsByBookerAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = isOwn ?
+                    bookingRepository.findOwnPast(userId, now) :
+                    bookingRepository.findBookingsByBookerIdAndEndIsBeforeOrderByStartDesc(userId, now);
                 break;
             }
             case "FUTURE": {
-                bookings = bookingRepository.findBookingsByBookerAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
+                bookings =  isOwn ?
+                    bookingRepository.findOwnFuture(userId, now) :
+                    bookingRepository.findBookingsByBookerIdAndStartIsAfterOrderByStartDesc(userId, now);
                 break;
             }
             default: {
+                bookings =  isOwn ?
+                    bookingRepository.findOwnByStatus(userId, Booking.Status.valueOf(state)) :
+                    bookingRepository.findBookingsByBookerIdAndStatus(userId, Booking.Status.valueOf(state));
             }
         }
         log.trace("Получено записей бронирования {}.", bookings.size());
+        List<BookingDtoOut> bookingDto = new ArrayList<>();
         for (Booking booking : bookings) {
-            bookingDtos.add(mapper.toBookingDto(booking));
+            bookingDto.add(BookingMapper.toBookingDto(booking));
         }
-        return bookingDtos;
+        return bookingDto;
     }
 
     private enum ApproveValues {
-        TRUE,
-        FALSE
+        TRUE, FALSE
     }
 
     private enum StateValues {
-        ALL,
-        CURRENT,
-        PAST,
-        FUTURE,
-        WAITING,
-        REJECTED
+        ALL, CURRENT, PAST, FUTURE, WAITING, REJECTED
     }
 }
