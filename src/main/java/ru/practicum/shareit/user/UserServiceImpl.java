@@ -15,28 +15,36 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addUser(UserDto userDto) {
-        User user = repository.addUser(userDto);
-        log.trace("Добавлен пользователь {}, ID {}.", user.getName(), user.getId());
+        log.trace("Добавлен пользователь {}.", userDto.getName());
+        User user = repository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
 
     @Override
     public UserDto updateUser(UserDto userDto, int userId) {
-        User user = repository.updateUser(userDto, userId);
+        User user = repository.getReferenceById(userId);
+        String name = userDto.getName();
+        if (name != null) {
+            user.setName(name);
+        }
+        String email = userDto.getEmail();
+        if (email != null) {
+            user.setEmail(email);
+        }
         log.trace("Изменён пользователь {}, ID {}.", user.getName(), userId);
-        return UserMapper.toUserDto(user);
+        return UserMapper.toUserDto(repository.save(user));
     }
 
     @Override
     public UserDto getUser(int userId) {
-        User user = repository.getUser(userId);
+        User user = repository.getReferenceById(userId);
         log.trace("Получен пользователь {}, ID {}.", user.getName(), userId);
         return UserMapper.toUserDto(user);
     }
 
-    @Override
+   @Override
     public List<UserDto> getUsers() {
-        List<User> users = repository.getUsers();
+        List<User> users = repository.findAll();
         List<UserDto> userDtos = new ArrayList<>();
         for (User user : users) {
             userDtos.add(UserMapper.toUserDto(user));
@@ -46,9 +54,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto removeUser(int userId) {
-        User user = repository.removeUser(userId);
-        log.trace("Удалён пользователь {}, ID {}.", user.getName(), userId);
-        return UserMapper.toUserDto(user);
+    public void removeUser(int userId) {
+        repository.deleteById(userId);
+        log.trace("Удалён пользователь ID {}.", userId);
     }
 }

@@ -8,9 +8,13 @@ public interface ItemService {
 
     ItemDto updateItem(ItemDto itemDto, int itemId, int userId);
 
-    ItemDto getItem(int itemId);
+    ItemDtoOut getItem(int itemId, int userId);
 
-    List<ItemDto> getItems(int userId);
+    List<ItemDtoOut> getItems(int userId);
 
     List<ItemDto> search(String text);
+
+    CommentDto addComment(CommentDto comment, int itemId, int userId);
+
+    List<CommentDto> getComments(int itemId);
 }

@@ -6,11 +6,11 @@ public interface UserService {
 
     UserDto addUser(UserDto userDto);
 
-    UserDto updateUser(UserDto userDto, int userId);
+    UserDto updateUser(UserDto user, int userId);
 
     UserDto getUser(int userId);
 
     List<UserDto> getUsers();
 
-    UserDto removeUser(int userId);
+    void removeUser(int userId);
 }
