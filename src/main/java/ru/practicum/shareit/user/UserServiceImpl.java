@@ -15,8 +15,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addUser(UserDto userDto) {
-        log.trace("Добавлен пользователь {}.", userDto.getName());
         User user = repository.save(UserMapper.toUser(userDto));
+        log.trace("Добавлен пользователь {}.", userDto.getName());
         return UserMapper.toUserDto(user);
     }
 

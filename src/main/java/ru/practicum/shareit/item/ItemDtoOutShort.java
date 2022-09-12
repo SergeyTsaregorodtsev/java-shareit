@@ -5,16 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class CommentDto {
+public class ItemDtoOutShort {
     int id;
-    @NotBlank
-    String text;
-    String authorName;
-    LocalDateTime created;
+    String name;
+    String description;
+    int ownerId;
+    boolean available;
+    int requestId;
 }

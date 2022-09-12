@@ -10,5 +10,5 @@ public interface BookingService {
 
     BookingDtoOut get(int bookingId, int userId);
 
-    List<BookingDtoOut> getAll(int userId, String state, boolean isOwn);
+    List<BookingDtoOut> getAll(int userId, String state, boolean isOwn, int from, int size);
 }

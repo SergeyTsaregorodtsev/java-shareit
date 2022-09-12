@@ -8,7 +8,7 @@ public interface ItemRequestService {
 
     List<ItemRequestDto> getOwnRequests(int userId);
 
-    List<ItemRequestDto> getAllRequests(int from, int size);
+    List<ItemRequestDto> getAllRequests(int from, int size, int userId);
 
-    ItemRequestDto get(int requestId);
+    ItemRequestDto get(int requestId, int userId);
 }

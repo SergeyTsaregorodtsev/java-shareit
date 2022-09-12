@@ -28,13 +28,13 @@ public class BookingMapper {
         );
     }
 
-    public static Booking toBooking(BookingDto bookingDto, Item item, User booker, Booking.Status status) {
-        return new Booking(
-                item,
-                booker,
-                bookingDto.getStart(),
-                bookingDto.getEnd(),
-                status
-        );
+    public static Booking toBooking(BookingDto dto, Item item, User booker, Booking.Status status) {
+        Booking booking = new Booking();
+        booking.setItem(item);
+        booking.setBooker(booker);
+        booking.setStart(dto.getStart());
+        booking.setEnd(dto.getEnd());
+        booking.setStatus(status);
+        return booking;
     }
 }

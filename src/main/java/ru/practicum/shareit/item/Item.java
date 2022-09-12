@@ -1,41 +1,36 @@
 package ru.practicum.shareit.item;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 
 @Data
-@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "items", schema = "public")
 public class Item {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    int id;
 
     @Column(name = "name", nullable = false, length = 255)
-    @NonNull @NotBlank
-    private String name;
+    String name;
 
     @Column(name = "description", nullable = false, length = 255)
-    @NonNull @NotBlank
-    private String description;
+    String description;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    @NonNull
-    private User owner;
+    @ManyToOne @JoinColumn(name = "owner_id", nullable = false)
+    User owner;
 
-    @NonNull
     @Column(name = "is_available", nullable = false)
-    private boolean available;
+    boolean available;
 
     @Column(name = "request_id")
-    private int requestId;
+    int requestId;
 }

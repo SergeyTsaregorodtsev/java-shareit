@@ -1,7 +1,12 @@
 package ru.practicum.shareit.booking;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.*;
@@ -16,10 +21,11 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class BookingServiceImpl implements BookingService {
-    private final BookingRepository bookingRepository;
-    private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
+    BookingRepository bookingRepository;
+    ItemRepository itemRepository;
+    UserRepository userRepository;
 
     @Override
     public BookingDtoOut addBooking(BookingDto bookingDto, int userId) {
@@ -109,7 +115,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoOut> getAll(int userId, String state, boolean isOwn) {
+    public List<BookingDtoOut> getAll(int userId, String state, boolean isOwn, int from, int size) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
             throw new EntityNotFoundException("Указанный пользователь не существует.");
@@ -119,40 +125,44 @@ public class BookingServiceImpl implements BookingService {
         } catch (IllegalArgumentException ignored) {
             throw new BadParameterException("Unknown state: " + state);
         }
-        List<Booking> bookings;
+        Pageable page = PageRequest.of(from / size, size);
+        Page<Booking> bookingPages;
+
         LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case "ALL": {
-                bookings = isOwn ?
-                    bookingRepository.findOwn(userId) :
-                    bookingRepository.findBookingsByBookerIdOrderByStartDesc(userId);
+                bookingPages = isOwn ?
+                    bookingRepository.findOwn(userId, page) :
+                    bookingRepository.findBookingsByBookerIdOrderByStartDesc(userId, page);
                 break;
             }
             case "CURRENT": {
-                bookings = isOwn ?
-                    bookingRepository.findOwnCurrent(userId, now) :
+                bookingPages = isOwn ?
+                    bookingRepository.findOwnCurrent(userId, now, page) :
                     bookingRepository.findBookingsByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
-                            userId, now, now);
+                            userId, now, now, page);
                 break;
             }
             case "PAST": {
-                bookings = isOwn ?
-                    bookingRepository.findOwnPast(userId, now) :
-                    bookingRepository.findBookingsByBookerIdAndEndIsBeforeOrderByStartDesc(userId, now);
+                bookingPages = isOwn ?
+                    bookingRepository.findOwnPast(userId, now, page) :
+                    bookingRepository.findBookingsByBookerIdAndEndIsBeforeOrderByStartDesc(userId, now, page);
                 break;
             }
             case "FUTURE": {
-                bookings =  isOwn ?
-                    bookingRepository.findOwnFuture(userId, now) :
-                    bookingRepository.findBookingsByBookerIdAndStartIsAfterOrderByStartDesc(userId, now);
+                bookingPages =  isOwn ?
+                    bookingRepository.findOwnFuture(userId, now, page) :
+                    bookingRepository.findBookingsByBookerIdAndStartIsAfterOrderByStartDesc(userId, now, page);
                 break;
             }
             default: {
-                bookings =  isOwn ?
-                    bookingRepository.findOwnByStatus(userId, Booking.Status.valueOf(state)) :
-                    bookingRepository.findBookingsByBookerIdAndStatus(userId, Booking.Status.valueOf(state));
+                bookingPages =  isOwn ?
+                    bookingRepository.findOwnByStatus(userId, Booking.Status.valueOf(state), page) :
+                    bookingRepository.findBookingsByBookerIdAndStatus(userId, Booking.Status.valueOf(state), page);
             }
         }
+
+        List<Booking> bookings = bookingPages.getContent();
         log.trace("Получено записей бронирования {}.", bookings.size());
         List<BookingDtoOut> bookingDto = new ArrayList<>();
         for (Booking booking : bookings) {

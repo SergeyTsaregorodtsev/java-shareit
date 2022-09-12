@@ -1,7 +1,22 @@
 package ru.practicum.shareit.requests;
 
-/**
- * // TODO .
- */
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import ru.practicum.shareit.item.ItemDtoOutShort;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Data
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class ItemRequestDto {
+    int id;
+    String description;
+    int requesterId;
+    LocalDateTime created;
+    @NonFinal List<ItemDtoOutShort> items;
 }
