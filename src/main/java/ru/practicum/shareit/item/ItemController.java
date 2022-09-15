@@ -42,7 +42,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDtoOut get(@RequestHeader("X-Sharer-User-Id") int userId,
+    public ItemDtoOut getItem(@RequestHeader("X-Sharer-User-Id") int userId,
                        @PathVariable int itemId) {
         log.trace("Получен GET-запрос на вещь ID {}.", itemId);
         return service.getItem(itemId, userId);
