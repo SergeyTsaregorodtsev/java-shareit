@@ -28,8 +28,10 @@ class UserControllerTest {
     UserService userService;
     @Autowired
     MockMvc mockMvc;
-    private final ObjectMapper mapper = new ObjectMapper();
-    private UserDto userDto;
+    ObjectMapper mapper = new ObjectMapper();
+    UserDto userDto;
+    static String TEMPLATE = "/users";
+    static String HEADER = "X-Sharer-User-Id";
 
     @BeforeEach
     void setUp() {
@@ -43,8 +45,7 @@ class UserControllerTest {
     @Test
     void create() throws Exception {
         when(userService.addUser(any())).thenReturn(userDto);
-
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post(TEMPLATE)
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -53,18 +54,15 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.id", is(userDto.getId())))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
-
         verify(userService, times(1)).addUser(userDto);
     }
 
     @Test
     void getAll() throws Exception {
         when(userService.getUsers()).thenReturn(Collections.emptyList());
-
-        mockMvc.perform(get("/users"))
+        mockMvc.perform(get(TEMPLATE))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
-
         verify(userService, times(1)).getUsers();
     }
 }

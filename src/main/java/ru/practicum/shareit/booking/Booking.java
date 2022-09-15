@@ -35,7 +35,7 @@ public class Booking {
     @Column(name = "status") @Enumerated(EnumType.STRING)
    Status status;
 
-    enum Status {
+    public enum Status {
         WAITING, APPROVED, REJECTED, CANCELED
     }
 }
