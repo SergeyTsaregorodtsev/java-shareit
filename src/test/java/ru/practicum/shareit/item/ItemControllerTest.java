@@ -57,7 +57,6 @@ class ItemControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(itemDto.getId())))
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
                 .andExpect(jsonPath("$.description", is(itemDto.getDescription())));
         verify(itemService, times(1)).addItem(itemDto, 1);
@@ -73,7 +72,6 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(itemDto.getId())))
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
                 .andExpect(jsonPath("$.description", is(itemDto.getDescription())));
         verify(itemService, times(1)).updateItem(itemDto, 1, 1);
@@ -89,23 +87,50 @@ class ItemControllerTest {
         verify(itemService, times(1)).getItems(1,1,1);
     }
 
-    /*@Test
+    @Test
     void getItem() throws Exception {
-
+        ItemDtoOut itemDtoOut = new ItemDtoOut(1,"Item1", "Item1Desc",
+                true, 0, lastBooking, null, null);
+        when(itemService.getItem(anyInt(), anyInt())).thenReturn(itemDtoOut);
+        mockMvc.perform(MockMvcRequestBuilders.get(TEMPLATE + "/{itemId}", 1)
+                        .header(HEADER, 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is(itemDtoOut.getName())));
+        verify(itemService, times(1)).getItem(1, 1);
     }
 
     @Test
     void search() throws Exception {
-
+        when(itemService.search(anyString(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+        mockMvc.perform(MockMvcRequestBuilders.get(TEMPLATE +
+                        "/search?text={text}&from={from}&size={size}", "text",1, 1))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+        verify(itemService, times(1)).search(anyString(), anyInt(), anyInt());
     }
 
     @Test
     void addComment() throws Exception {
-
+        LocalDateTime now = LocalDateTime.now();
+        CommentDto commentDto = new CommentDto(1, "Comment", "authorName", now);
+        when(itemService.addComment(any(CommentDto.class), anyInt(), anyInt())).thenReturn(commentDto);
+        mockMvc.perform(MockMvcRequestBuilders.post(TEMPLATE + "/{itemId}/comment", 1)
+                .header(HEADER, 1)
+                .content(mapper.writeValueAsString(commentDto))
+                .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.text", is(commentDto.getText())));
+        verify(itemService, times(1)).addComment(commentDto,1, 1);
     }
 
     @Test
-    void getComment() throws Exception {
-
-    }*/
+    void getComments() throws Exception {
+        when(itemService.getComments(anyInt())).thenReturn(Collections.emptyList());
+        mockMvc.perform(MockMvcRequestBuilders.get(TEMPLATE + "/{itemId}/comments", 1))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+        verify(itemService, times(1)).getComments(1);
+    }
 }

@@ -70,7 +70,6 @@ class UserControllerTest {
         when(userService.getUser(anyInt())).thenReturn(userDto);
         mockMvc.perform(MockMvcRequestBuilders.get(TEMPLATE + "/{userId}", 1))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(userDto.getId())))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
         verify(userService, times(1)).getUser(1);
