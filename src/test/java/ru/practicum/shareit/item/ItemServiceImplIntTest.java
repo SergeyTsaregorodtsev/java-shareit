@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingDto;
@@ -24,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         properties = "db.name=test",
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ItemServiceImplIntTest {
     private final EntityManager em;
     private final ItemService itemService;
@@ -33,11 +32,10 @@ public class ItemServiceImplIntTest {
 
     @Test
     void getItems() {
-        UserDto userDto = new UserDto(1, "Richard Roe", "RichardRoe@mail.com");
-        userService.addUser(userDto);
+        UserDto userDto = userService.addUser(new UserDto(1, "Richard Roe", "RichardRoe@mail.com"));
         ItemDto itemDto = new ItemDto(1, "Hammer", "John Doe's hammer",
                 true,null,null,null);
-        itemService.addItem(itemDto,1);
+        itemService.addItem(itemDto,userDto.getId());
 
         TypedQuery<Item> query = em.createQuery("Select item from Item item where item.owner.id = :id", Item.class);
         List<Item> items = query.setParameter("id", userDto.getId()).getResultList();
