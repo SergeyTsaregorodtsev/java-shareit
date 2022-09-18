@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.Create;
-import ru.practicum.shareit.Update;
+import ru.practicum.shareit.common.Create;
+import ru.practicum.shareit.common.Update;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> get() {
+    public List<UserDto> getAll() {
         log.trace("Получен GET-запрос по всем пользователям.");
         return service.getUsers();
     }

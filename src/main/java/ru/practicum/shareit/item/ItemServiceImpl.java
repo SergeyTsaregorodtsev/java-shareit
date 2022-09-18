@@ -1,10 +1,16 @@
 package ru.practicum.shareit.item;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.*;
-import ru.practicum.shareit.exceptions.BadParameterException;
+import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.user.*;
 
 import javax.persistence.EntityNotFoundException;
@@ -16,11 +22,12 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ItemServiceImpl implements ItemService {
-    private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
-    private final BookingRepository bookingRepository;
-    private final CommentRepository commentRepository;
+    ItemRepository itemRepository;
+    UserRepository userRepository;
+    BookingRepository bookingRepository;
+    CommentRepository commentRepository;
 
     @Override
     public ItemDto addItem(ItemDto itemDto, int userId) {
@@ -85,8 +92,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoOut> getItems(int userId) {
-        List<Item> items = itemRepository.findByOwnerIdOrderById(userId);
+    public List<ItemDtoOut> getItems(int userId, int from, int size) {
+        Sort sortById = Sort.by(Sort.Direction.ASC, "id");
+        Pageable page = PageRequest.of(from / size, size, sortById);
+        Page<Item> itemsPage = itemRepository.findByOwnerIdOrderById(userId, page);
+        List<Item> items = itemsPage.getContent();
         List<ItemDtoOut> itemsDto = new ArrayList<>();
         for (Item item : items) {
             ItemDtoOut itemDto = ItemMapper.toItemDtoOut(item);
@@ -99,13 +109,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(String text) {
+    public List<ItemDto> search(String text, int from, int size) {
         List<ItemDto> itemsDto = new ArrayList<>();
         if (text.isBlank() || text.length() < 3) {
             return itemsDto;
         }
-        List<Item> items = itemRepository.findByNameContainsIgnoreCaseOrDescriptionContainsIgnoreCaseAndAvailable(
-                text, text, true);
+        Sort sortById = Sort.by(Sort.Direction.ASC, "id");
+        Pageable page = PageRequest.of(from / size, size, sortById);
+        Page<Item> itemsPage = itemRepository.findByNameContainsIgnoreCaseOrDescriptionContainsIgnoreCaseAndAvailable(
+                text, text, true, page);
+        List<Item> items = itemsPage.getContent();
         for (Item item : items) {
             itemsDto.add(ItemMapper.toItemDto(item));
         }
@@ -130,7 +143,30 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<CommentDto> getComments(int itemId) {
-        return null;
+        Optional<Item> item = itemRepository.findById(itemId);
+        if (item.isEmpty()) {
+            throw new EntityNotFoundException("Неверно указан ID вещи.");
+        }
+        List<Comment> comments = commentRepository.findCommentsByItemIdOrderByCreated(itemId);
+        List<CommentDto> commentsDto = new ArrayList<>();
+        for (Comment comment : comments) {
+            CommentDto commentDto = CommentMapper.toCommentDto(comment);
+            commentsDto.add(commentDto);
+        }
+        return commentsDto;
+    }
+
+    @Override
+    public List<CommentDto> getCommentsOwn(int userId) {
+        Page<Item> items = itemRepository.findByOwnerIdOrderById(userId, Pageable.unpaged());
+        List<CommentDto> commentsDto = new ArrayList<>();
+        for (Item item : items.getContent()) {
+            List<Comment> comments = commentRepository.findCommentsByItemIdOrderByCreated(item.getId());
+            for (Comment comment : comments) {
+                commentsDto.add(CommentMapper.toCommentDto(comment));
+            }
+        }
+        return commentsDto;
     }
 
     private void addBookingToItemDto(ItemDtoOut itemDto) {
@@ -157,7 +193,6 @@ public class ItemServiceImpl implements ItemService {
 
     private void addCommentsToItemDto(ItemDtoOut itemDto) {
         int itemId = itemDto.getId();
-
         List<Comment> comments = commentRepository.findCommentsByItemIdOrderByCreated(itemId);
         List<CommentDto> commentDtos = new ArrayList<>();
         for (Comment comment : comments) {

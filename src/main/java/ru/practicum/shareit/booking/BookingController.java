@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.Create;
+import ru.practicum.shareit.common.Create;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
 public class BookingController {
@@ -39,16 +42,20 @@ public class BookingController {
 
     @GetMapping()
     public List<BookingDtoOut> getAll(@RequestHeader("X-Sharer-User-Id") int userId,
-                                   @RequestParam(value = "state", defaultValue = "ALL") String state) {
+                                      @RequestParam(value = "state", defaultValue = "ALL") String state,
+                                      @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") int from,
+                                      @Positive @RequestParam(name = "size", defaultValue = "10") int size) {
         log.trace("Получен GET-запрос брони от пользователя ID {}, статус - {}.", userId, state);
-        return service.getAll(userId, state, false);
+        return service.getAll(userId, state, false, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingDtoOut> getOwn(@RequestHeader("X-Sharer-User-Id") int userId,
-                                      @RequestParam(value = "state", defaultValue = "ALL") String state) {
+                                      @RequestParam(value = "state", defaultValue = "ALL") String state,
+                                      @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") int from,
+                                      @Positive @RequestParam(name = "size", defaultValue = "10") int size) {
         log.trace("Получен GET-запрос бронирований на вещи пользователя ID {}, статус - {}.", userId, state);
-        return service.getAll(userId, state, true);
+        return service.getAll(userId, state, true, from, size);
     }
 
 

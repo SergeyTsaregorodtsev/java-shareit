@@ -1,9 +1,7 @@
 package ru.practicum.shareit.booking;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
@@ -11,43 +9,32 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
-@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "bookings", schema = "public")
 public class Booking {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    int id;
 
-    @NonNull
-    @ManyToOne
-    @JoinColumn(name = "item_id", nullable = false)
-    private Item item;
+    @ManyToOne @JoinColumn(name = "item_id", nullable = false)
+    Item item;
 
-    @NonNull
-    @ManyToOne
-    @JoinColumn(name = "booker_id", nullable = false)
-    private User booker;
+    @ManyToOne @JoinColumn(name = "booker_id", nullable = false)
+    User booker;
 
-    @NonNull
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime start;
+    LocalDateTime start;
 
-    @NonNull
     @Column(name = "end_date", nullable = false)
-    private LocalDateTime end;
+    LocalDateTime end;
 
-    @NonNull
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private Status status;
+    @Column(name = "status") @Enumerated(EnumType.STRING)
+   Status status;
 
-    enum Status {
-        WAITING,    // ожидает одобрения
-        APPROVED,   // подтверждено владельцем
-        REJECTED,   // отклонено владельцем
-        CANCELED    // отменено создателем
+    public enum Status {
+        WAITING, APPROVED, REJECTED, CANCELED
     }
 }

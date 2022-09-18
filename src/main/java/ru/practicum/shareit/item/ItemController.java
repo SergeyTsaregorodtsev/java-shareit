@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.Create;
+import ru.practicum.shareit.common.Create;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
@@ -31,22 +34,26 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDtoOut> getAll(@RequestHeader("X-Sharer-User-Id") int userId) {
+    public List<ItemDtoOut> getAll(@RequestHeader("X-Sharer-User-Id") int userId,
+                                   @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") int from,
+                                   @Positive @RequestParam(name = "size", defaultValue = "10") int size) {
         log.trace("Получен GET-запрос на получение списка вещей пользователя ID {}.", userId);
-        return service.getItems(userId);
+        return service.getItems(userId, from, size);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDtoOut get(@RequestHeader("X-Sharer-User-Id") int userId,
+    public ItemDtoOut getItem(@RequestHeader("X-Sharer-User-Id") int userId,
                        @PathVariable int itemId) {
         log.trace("Получен GET-запрос на вещь ID {}.", itemId);
         return service.getItem(itemId, userId);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam(name = "text") String text) {
+    public List<ItemDto> search(@RequestParam(name = "text") String text,
+                                @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") int from,
+                                @Positive @RequestParam(name = "size", defaultValue = "10") int size) {
         log.trace("Получен GET-запрос на поиск вещей по ключевому слову '{}'.", text);
-        return service.search(text);
+        return service.search(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
@@ -59,5 +66,10 @@ public class ItemController {
     @GetMapping("/{itemId}/comments")
     public List<CommentDto> getComments(@PathVariable int itemId) {
         return service.getComments(itemId);
+    }
+
+    @GetMapping("/comments")
+    public List<CommentDto> getCommentsOwn(@RequestHeader("X-Sharer-User-Id") int userId) {
+        return service.getCommentsOwn(userId);
     }
 }

@@ -31,13 +31,23 @@ public class ItemMapper {
         );
     }
 
-    public static Item toItem(ItemDto itemDto, User owner) {
-        Item item = new Item(
-                itemDto.getName(),
-                itemDto.getDescription(),
-                owner,
-                itemDto.getAvailable()
+    public static ItemDtoOutShort itemDtoOutShort(Item item) {
+        return new ItemDtoOutShort(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getOwner().getId(),
+                item.isAvailable(),
+                item.getRequestId()
         );
+    }
+
+    public static Item toItem(ItemDto itemDto, User owner) {
+        Item item = new Item();
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setOwner(owner);
+        item.setAvailable(itemDto.getAvailable());
         Integer requestId = itemDto.getRequestId();
         if (requestId != null) {
             item.setRequestId(itemDto.getRequestId());

@@ -1,27 +1,21 @@
 package ru.practicum.shareit.item;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.BookingDtoShort;
 
 import java.util.List;
 
 @Data
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemDtoOut {
-    private final int id;
-
-    private final String name;
-
-    private final String description;
-
-    private final Boolean available;
-
-    private final Integer requestId;
-
-    private BookingDtoShort lastBooking;
-
-    private BookingDtoShort nextBooking;
-
-    private List<CommentDto> comments;
+    final int id;
+    final String name;
+    final String description;
+    final Boolean available;
+    final Integer requestId;
+    BookingDtoShort lastBooking;
+    BookingDtoShort nextBooking;
+    List<CommentDto> comments;
 }

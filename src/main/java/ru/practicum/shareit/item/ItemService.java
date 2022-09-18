@@ -10,11 +10,13 @@ public interface ItemService {
 
     ItemDtoOut getItem(int itemId, int userId);
 
-    List<ItemDtoOut> getItems(int userId);
+    List<ItemDtoOut> getItems(int userId, int from, int size);
 
-    List<ItemDto> search(String text);
+    List<ItemDto> search(String text, int from, int size);
 
     CommentDto addComment(CommentDto comment, int itemId, int userId);
 
     List<CommentDto> getComments(int itemId);
+
+    List<CommentDto> getCommentsOwn(int userId);
 }
