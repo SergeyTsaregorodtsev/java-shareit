@@ -1,9 +1,9 @@
 package ru.practicum.shareit.exceptions;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@Data
+@Getter
 @RequiredArgsConstructor
 public class ErrorResponse {
     private final String error;

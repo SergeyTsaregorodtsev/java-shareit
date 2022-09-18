@@ -17,4 +17,6 @@ public interface ItemService {
     CommentDto addComment(CommentDto comment, int itemId, int userId);
 
     List<CommentDto> getComments(int itemId);
+
+    List<CommentDto> getCommentsOwn(int userId);
 }

@@ -63,12 +63,4 @@ class UserServiceImplTest {
         assertEquals("John Doe", userDto.getName());
         assertEquals("JohnDoe@mail.com", userDto.getEmail());
     }
-
-    @Test
-    void testGetUsers() {
-    }
-
-    @Test
-    void removeUser() {
-    }
 }

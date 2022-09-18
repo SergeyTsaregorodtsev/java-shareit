@@ -35,7 +35,6 @@ class ItemControllerTest {
     ObjectMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
     BookingDtoShort lastBooking;
     ItemDto itemDto;
-    static String TEMPLATE = "/items";
     static String HEADER = "X-Sharer-User-Id";
 
     @BeforeEach
@@ -50,7 +49,7 @@ class ItemControllerTest {
     @Test
     void add() throws Exception {
         when(itemService.addItem(any(), anyInt())).thenReturn(itemDto);
-        mockMvc.perform(MockMvcRequestBuilders.post(TEMPLATE)
+        mockMvc.perform(MockMvcRequestBuilders.post("/items")
                         .header(HEADER,1)
                         .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -65,7 +64,7 @@ class ItemControllerTest {
     @Test
     void update() throws Exception {
         when(itemService.updateItem(any(), anyInt(), anyInt())).thenReturn(itemDto);
-        mockMvc.perform(MockMvcRequestBuilders.patch(TEMPLATE + "/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch("/items/1")
                         .header(HEADER,1)
                         .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -80,7 +79,7 @@ class ItemControllerTest {
     @Test
     void getAll() throws Exception {
         when(itemService.getItems(anyInt(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
-        mockMvc.perform(MockMvcRequestBuilders.get(TEMPLATE + "?from={from}&size={size}", 1, 1)
+        mockMvc.perform(MockMvcRequestBuilders.get("/items?from={from}&size={size}", 1, 1)
                         .header(HEADER,1))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
@@ -92,7 +91,7 @@ class ItemControllerTest {
         ItemDtoOut itemDtoOut = new ItemDtoOut(1,"Item1", "Item1Desc",
                 true, 0, lastBooking, null, null);
         when(itemService.getItem(anyInt(), anyInt())).thenReturn(itemDtoOut);
-        mockMvc.perform(MockMvcRequestBuilders.get(TEMPLATE + "/{itemId}", 1)
+        mockMvc.perform(MockMvcRequestBuilders.get("/items/{itemId}", 1)
                         .header(HEADER, 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(itemDtoOut.getName())));
@@ -102,8 +101,8 @@ class ItemControllerTest {
     @Test
     void search() throws Exception {
         when(itemService.search(anyString(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
-        mockMvc.perform(MockMvcRequestBuilders.get(TEMPLATE +
-                        "/search?text={text}&from={from}&size={size}", "text",1, 1))
+        mockMvc.perform(MockMvcRequestBuilders.get("/items/search?text={text}&from={from}&size={size}",
+                        "text",1, 1))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
         verify(itemService, times(1)).search(anyString(), anyInt(), anyInt());
@@ -114,7 +113,7 @@ class ItemControllerTest {
         LocalDateTime now = LocalDateTime.now();
         CommentDto commentDto = new CommentDto(1, "Comment", "authorName", now);
         when(itemService.addComment(any(CommentDto.class), anyInt(), anyInt())).thenReturn(commentDto);
-        mockMvc.perform(MockMvcRequestBuilders.post(TEMPLATE + "/{itemId}/comment", 1)
+        mockMvc.perform(MockMvcRequestBuilders.post("/items/{itemId}/comment", 1)
                 .header(HEADER, 1)
                 .content(mapper.writeValueAsString(commentDto))
                 .characterEncoding(StandardCharsets.UTF_8)
@@ -128,9 +127,19 @@ class ItemControllerTest {
     @Test
     void getComments() throws Exception {
         when(itemService.getComments(anyInt())).thenReturn(Collections.emptyList());
-        mockMvc.perform(MockMvcRequestBuilders.get(TEMPLATE + "/{itemId}/comments", 1))
+        mockMvc.perform(MockMvcRequestBuilders.get("/items/{itemId}/comments", 1))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
         verify(itemService, times(1)).getComments(1);
+    }
+
+    @Test
+    void getCommentsOwn() throws Exception {
+        when(itemService.getCommentsOwn(anyInt())).thenReturn(Collections.emptyList());
+        mockMvc.perform(MockMvcRequestBuilders.get("/items/comments")
+                .header(HEADER, 1))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+        verify(itemService, times(1)).getCommentsOwn(1);
     }
 }

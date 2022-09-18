@@ -67,4 +67,9 @@ public class ItemController {
     public List<CommentDto> getComments(@PathVariable int itemId) {
         return service.getComments(itemId);
     }
+
+    @GetMapping("/comments")
+    public List<CommentDto> getCommentsOwn(@RequestHeader("X-Sharer-User-Id") int userId) {
+        return service.getCommentsOwn(userId);
+    }
 }

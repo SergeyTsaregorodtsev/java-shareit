@@ -143,7 +143,30 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<CommentDto> getComments(int itemId) {
-        return null;
+        Optional<Item> item = itemRepository.findById(itemId);
+        if (item.isEmpty()) {
+            throw new EntityNotFoundException("Неверно указан ID вещи.");
+        }
+        List<Comment> comments = commentRepository.findCommentsByItemIdOrderByCreated(itemId);
+        List<CommentDto> commentsDto = new ArrayList<>();
+        for (Comment comment : comments) {
+            CommentDto commentDto = CommentMapper.toCommentDto(comment);
+            commentsDto.add(commentDto);
+        }
+        return commentsDto;
+    }
+
+    @Override
+    public List<CommentDto> getCommentsOwn(int userId) {
+        Page<Item> items = itemRepository.findByOwnerIdOrderById(userId, Pageable.unpaged());
+        List<CommentDto> commentsDto = new ArrayList<>();
+        for (Item item : items.getContent()) {
+            List<Comment> comments = commentRepository.findCommentsByItemIdOrderByCreated(item.getId());
+            for (Comment comment : comments) {
+                commentsDto.add(CommentMapper.toCommentDto(comment));
+            }
+        }
+        return commentsDto;
     }
 
     private void addBookingToItemDto(ItemDtoOut itemDto) {

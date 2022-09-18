@@ -111,7 +111,7 @@ public class BookingServiceImpl implements BookingService {
         if (userId != bookerId & userId != ownerId) {
             throw new EntityNotFoundException("Пользователь не может запрашивать данные.");
         }
-        return BookingMapper.toBookingDto(bookingRepository.findBookingById(bookingId));
+        return BookingMapper.toBookingDto(currentBooking);
     }
 
     @Override

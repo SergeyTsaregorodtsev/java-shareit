@@ -23,7 +23,6 @@ class ItemRepositoryTest {
     void setUp() {
         user1 = userRepository.save(new User(1, "John Doe", "JohnDoe@mail.com"));
         item1 = itemRepository.save(new Item(1, "item1", "item1Desc", user1, true, 1));
-
         user2 = userRepository.save(new User(2, "Richard Roe", "RichardRoe@mail.com"));
         item2 = itemRepository.save(new Item(2, "item2", "item2Desc", user2, true, 2));
     }
@@ -36,7 +35,8 @@ class ItemRepositoryTest {
 
     @Test
     void findByOwnerIdOrderById() {
-        Page<Item> itemPage = itemRepository.findByOwnerIdOrderById(1, Pageable.unpaged());
+        int userId = user1.getId();
+        Page<Item> itemPage = itemRepository.findByOwnerIdOrderById(userId, Pageable.unpaged());
         assertNotNull(itemPage);
         assertEquals(1L, itemPage.getTotalElements());
         assertEquals("item1", itemPage.getContent().get(0).getName());

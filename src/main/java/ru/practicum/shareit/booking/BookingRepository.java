@@ -10,8 +10,6 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
-    Booking findBookingById(int bookingId);
-
     Page<Booking> findBookingsByBookerIdOrderByStartDesc(int bookerId, Pageable page);
 
     Page<Booking> findBookingsByBookerIdAndEndIsBeforeOrderByStartDesc(

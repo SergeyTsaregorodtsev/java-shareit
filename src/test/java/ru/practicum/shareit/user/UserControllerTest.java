@@ -28,7 +28,6 @@ class UserControllerTest {
     MockMvc mockMvc;
     ObjectMapper mapper = new ObjectMapper();
     UserDto userDto;
-    static String TEMPLATE = "/users";
 
     @BeforeEach
     void setUp() {
@@ -38,7 +37,7 @@ class UserControllerTest {
     @Test
     void create() throws Exception {
         when(userService.addUser(any())).thenReturn(userDto);
-        mockMvc.perform(MockMvcRequestBuilders.post(TEMPLATE)
+        mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -53,7 +52,7 @@ class UserControllerTest {
     @Test
     void update() throws Exception {
         when(userService.updateUser(any(), anyInt())).thenReturn(userDto);
-        mockMvc.perform(MockMvcRequestBuilders.patch(TEMPLATE + "/{userId}", 1)
+        mockMvc.perform(MockMvcRequestBuilders.patch("/users/{userId}", 1)
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -68,7 +67,7 @@ class UserControllerTest {
     @Test
     void get() throws Exception {
         when(userService.getUser(anyInt())).thenReturn(userDto);
-        mockMvc.perform(MockMvcRequestBuilders.get(TEMPLATE + "/{userId}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.get("/users/{userId}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
@@ -78,7 +77,7 @@ class UserControllerTest {
     @Test
     void getAll() throws Exception {
         when(userService.getUsers()).thenReturn(Collections.emptyList());
-        mockMvc.perform(MockMvcRequestBuilders.get(TEMPLATE))
+        mockMvc.perform(MockMvcRequestBuilders.get("/users"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
         verify(userService, times(1)).getUsers();
@@ -86,7 +85,7 @@ class UserControllerTest {
 
     @Test
     void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete(TEMPLATE + "/{userId}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/users/{userId}", 1))
                 .andExpect(status().isOk());
         verify(userService, times(1)).removeUser(1);
     }

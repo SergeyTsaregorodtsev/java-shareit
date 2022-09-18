@@ -1,8 +1,6 @@
 package ru.practicum.shareit.user;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.common.Create;
 import ru.practicum.shareit.common.Update;

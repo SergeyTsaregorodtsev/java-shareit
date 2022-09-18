@@ -11,15 +11,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Collections;
 
-//import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -32,7 +32,6 @@ class ItemRequestControllerTest {
     MockMvc mockMvc;
     ObjectMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
     ItemRequestDto itemRequestDto;
-    static String TEMPLATE = "/requests";
     static String HEADER = "X-Sharer-User-Id";
     static LocalDateTime CREATED = LocalDateTime.now();
 
@@ -44,7 +43,7 @@ class ItemRequestControllerTest {
     @Test
     void addRequest() throws Exception {
         when(itemRequestService.addRequest(any(), anyInt())).thenReturn(itemRequestDto);
-        mockMvc.perform(post(TEMPLATE)
+        mockMvc.perform(post("/requests")
                         .header(HEADER, 1)
                         .content(mapper.writeValueAsString(itemRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -55,5 +54,35 @@ class ItemRequestControllerTest {
                 .andExpect(jsonPath("$.description", is(itemRequestDto.getDescription())))
                 .andExpect(jsonPath("$.requesterId", is(itemRequestDto.getRequesterId())));
         verify(itemRequestService, times(1)).addRequest(itemRequestDto,1);
+    }
+
+    @Test
+    void getOwnRequests() throws Exception {
+        when(itemRequestService.getOwnRequests(anyInt())).thenReturn(Collections.emptyList());
+        mockMvc.perform(MockMvcRequestBuilders.get("/requests")
+                .header(HEADER, 1))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+        verify(itemRequestService, times(1)).getOwnRequests(1);
+    }
+
+    @Test
+    void getAllRequests() throws Exception {
+        when(itemRequestService.getAllRequests(anyInt(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+        mockMvc.perform(MockMvcRequestBuilders.get("/requests/all?from={from}&size={size}",1, 1)
+                .header(HEADER, 1))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+        verify(itemRequestService, times(1)).getAllRequests(1, 1, 1);
+    }
+
+    @Test
+    void get() throws Exception {
+        when(itemRequestService.get(anyInt(), anyInt())).thenReturn(itemRequestDto);
+        mockMvc.perform(MockMvcRequestBuilders.get("/requests/{requestId}", 1)
+               .header(HEADER, 1))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.description", is(itemRequestDto.getDescription())));
+        verify(itemRequestService, times(1)).get(1, 1);
     }
 }
