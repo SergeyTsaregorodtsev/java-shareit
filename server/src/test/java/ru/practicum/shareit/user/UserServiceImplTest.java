@@ -2,12 +2,10 @@ package ru.practicum.shareit.user;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-//import org.mockito.ArgumentMatchers;
 
 import java.util.Collections;
 import java.util.List;
 
-//import static org.hamcrest.Matchers.any;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +21,29 @@ class UserServiceImplTest {
         userRepository = mock(UserRepository.class);
         userService = new UserServiceImpl(userRepository);
     }
+
+    @Test
+    void addUser() {
+        UserDto userDto = new UserDto(1, "John Doe", "JohnDoe@mail.com");
+        User user = UserMapper.toUser(userDto);
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        UserDto newUserDto = userService.addUser(userDto);
+        verify(userRepository, times(1)).save(user);
+        assertEquals("John Doe", newUserDto.getName());
+    }
+
+/*    @Test
+    void removeUser() {
+        User user = new User(1, "John Doe", "JohnDoe@mail.com");
+        when(userRepository.getReferenceById(anyInt())).thenReturn(user);
+        Mockito.doNothing().when(userRepository).deleteById(anyInt());
+
+        userService.removeUser(1);
+        verify(userRepository, times(1)).getReferenceById(1);
+        verify(userRepository, times(1)).deleteById(1);
+
+    }*/
 
     @Test
     void getUsers() {
